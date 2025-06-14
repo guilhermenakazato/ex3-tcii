@@ -57,21 +57,16 @@ namespace tcii::physx { // begin namespace tcii::physx
       return _soa.template get<0>(index);
     }
 
-    // Assume que a cor � o segundo elemento da tupla
-    // auto& color(unsigned index) const {
-    //   return _soa.template get<1>(index);
-    // }
-
+    // Pega o atributo n na posição index
     template <size_t n>
     auto& getAttribute(unsigned index) const {
       return _soa.template get<n>(index);
     }
 
-    // usar _soa.template get...?
-    // Permite modificar para uma cor espec�fica (usado em teste)
-    void setColor(unsigned index, const Vec3f &color)
-    {
-      _soa.template get<1>(index) = color;
+    // Permite modificar um atributo n na posição index com o valor value
+    template <size_t n>
+    void setAttribute(unsigned index, const Vec3f& value) {
+      _soa.template get<n>(index) = value;
     }
 
     auto begin() {

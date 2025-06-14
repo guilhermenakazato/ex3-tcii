@@ -18,6 +18,16 @@ int main() {
     cout << "Cor: " << it.get<2>() << endl << endl;
   }
 
+  // Muda o atributo 2 do elemento na posição 1, ou seja, a cor
+  pb->setAttribute<1>(1, {1,1,1});
+
+  cout << "-----------------------" << endl;
+  for(auto it = pb->begin(); it != pb->end(); it++) {
+    cout << "Posição: " << it.get<0>() << endl;
+    cout << "Velocidade: " << it.get<1>() << endl;
+    cout << "Cor: " << it.get<2>() << endl << endl;
+  }
+
   cout << endl;
   auto pc = pb->particleCount();
 
