@@ -74,7 +74,7 @@ template <typename... Fields>
 void
 ParticleSystem<Fields...>::render(Renderer& renderer) const
 {
-  // TODO
+	_particles->render(renderer);
 }
 
 } // end namespace tcii::physx

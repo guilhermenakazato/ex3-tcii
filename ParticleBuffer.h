@@ -6,69 +6,124 @@
 #include "SoA.h"
 #include "Renderer.h"
 
-namespace tcii::physx
-{ // begin namespace tcii::physx
+/*
+Autor(es): Guilherme Fernandes Nakazato ; Felipe Jun Takahashi
+*/
 
-using namespace cg;
+namespace tcii::physx { // begin namespace tcii::physx
+  using namespace cg;
 
-template <typename... Fields> class ParticleSystem;
+  template <typename... Fields>
+  class ParticleSystem;
 
-template <typename... Fields>
-class ParticleBuffer: public SharedObject
-{
-public:
-  auto particleCount() const
+  // Estrutura MyAllocator vista em sala de aula, utilizada como argumento para SoA
+  struct MyAllocator {
+    template <typename T>
+    static auto allocate(unsigned count) {
+      return new T[count];
+    }
+
+    template <typename T>
+    static void free(T *ptr) {
+      delete[] ptr;
+    }
+  };
+
+  template <typename... Fields>
+  class ParticleBuffer : public SharedObject
   {
-    return _particleCount;
+  public:
+    auto particleCount() const {
+      return _particleCount;
+    }
+
+    auto capacity() const {
+      return _capacity;
+    }
+
+    void add(const Vec3f &p, const Fields &...fields) {
+      if (!(_particleCount >= _capacity)) {
+        _soa.template set(_particleCount++, p, fields...);
+      }
+    }
+
+    // sem delete...?
+    void clear() {
+      _particleCount = 0;
+    }
+
+    // Assume que a posição é o primeiro elemento da tupla
+    auto& position(unsigned index) const {
+      return _soa.template get<0>(index);
+    }
+
+    // Assume que a cor � o segundo elemento da tupla
+    // auto& color(unsigned index) const {
+    //   return _soa.template get<1>(index);
+    // }
+
+    template <size_t n>
+    auto& getAttribute(unsigned index) const {
+      return _soa.template get<n>(index);
+    }
+
+    // usar _soa.template get...?
+    // Permite modificar para uma cor espec�fica (usado em teste)
+    void setColor(unsigned index, const Vec3f &color)
+    {
+      _soa.template get<1>(index) = color;
+    }
+
+    auto begin() {
+      return _soa.begin(); 
+    }
+
+    auto end() {
+      return _soa.end();
+    }
+
+    Bounds3f bounds() const;
+    void render(Renderer &) const;
+
+  private:
+    unsigned _particleCount{};
+    unsigned _capacity{};
+
+    SoA<MyAllocator, unsigned, Vec3f, Fields...> _soa;
+
+    ParticleBuffer(unsigned capacity)
+        : _particleCount(0),
+          _capacity(capacity),
+          _soa(capacity)
+    {
+    }
+
+    friend ParticleSystem<Fields...>;
+
+  }; // ParticleBuffer
+
+  template <typename... Fields>
+  Bounds3f
+  ParticleBuffer<Fields...>::bounds() const
+  {
+    Bounds3f b;
+    for (auto i = 0u; i < _particleCount; i++)
+    {
+      b.inflate(_soa.template get<0>(i));
+    }
+
+    return b;
   }
 
-  auto capacity() const
+  template <typename... Fields>
+  void
+  ParticleBuffer<Fields...>::render(Renderer &renderer) const
   {
-    // TODO
-    return 0u;
+    for (auto i = 0u; i < _particleCount; i++)
+    {
+      renderer.draw("Particle", _soa.template get<0>(i));
+    }
   }
-
-  void add(const Vec3f& p, const Fields&... fields)
-  {
-    // TODO
-  }
-
-  void clear()
-  {
-    // TODO
-  }
-
-  Bounds3f bounds() const;
-  void render(Renderer&) const;
-
-private:
-  unsigned _particleCount{};
-
-  ParticleBuffer(unsigned capacity)
-  {
-    // TODO
-  }
-
-  friend ParticleSystem<Fields...>;
-
-}; // ParticleBuffer
-
-template <typename... Fields>
-Bounds3f
-ParticleBuffer<Fields...>::bounds() const
-{
-  Bounds3f b;
-
-  // TODO
-  return b;
-}
-
-template <typename... Fields>
-void
-ParticleBuffer<Fields...>::render(Renderer& renderer) const
-{
-  // TODO
-}
 
 } // end namespace tcii::physx
 
