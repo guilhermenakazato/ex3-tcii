@@ -43,11 +43,10 @@ namespace tcii::physx { // begin namespace tcii::physx
 
     void add(const Vec3f &p, const Fields &...fields) {
       if (!(_particleCount >= _capacity)) {
-        _soa.template set(_particleCount++, p, fields...);
+        _soa.set(_particleCount++, p, fields...);
       }
     }
 
-    // sem delete...?
     void clear() {
       _particleCount = 0;
     }
